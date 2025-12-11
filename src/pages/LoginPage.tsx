@@ -126,6 +126,15 @@ export function LoginPage() {
               >
                 {isPending ? "Ingresando..." : "Ingresar"}
               </Button>
+
+              {/* Logo debajo del botón */}
+              <div className="flex justify-center mt-4">
+                <img
+                  src="/logo_tu_carnet.svg"
+                  alt="Logo Tu Carnet UFPS"
+                  className="w-20 h-20"
+                />
+              </div>
             </form>
           </Form>
         </CardContent>
