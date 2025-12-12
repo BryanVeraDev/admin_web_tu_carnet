@@ -24,14 +24,24 @@ function SolicitudDetailPage() {
   const [comment, setComment] = useState("");
 
   // 1. Cuando ya tenemos la solicitud, sacamos la key
-  const photoKey = data?.new_photo_url ?? null;
+
+  const currentPhotoKey = data?.student.card_photo_key ?? null;
+  const newPhotoKey = data?.new_photo_url ?? null;
 
   // 2. Pedimos al servicio de liveness el URL firmado
+  // Foto actual
   const {
-    data: photoUrl,
-    isLoading: isPhotoLoading,
-    isError: isPhotoError,
-  } = useLivenessPhotoUrl(photoKey);
+    data: currentPhotoUrl,
+    isLoading: isCurrentLoading,
+    isError: isCurrentError,
+  } = useLivenessPhotoUrl(currentPhotoKey);
+
+  // Foto nueva
+  const {
+    data: newPhotoUrl,
+    isLoading: isNewLoading,
+    isError: isNewError,
+  } = useLivenessPhotoUrl(newPhotoKey);
 
   if (isLoading) {
     return <p className="p-4">Cargando solicitud...</p>;
@@ -64,7 +74,7 @@ function SolicitudDetailPage() {
       trimmed ||
       (status === "APROBADO"
         ? "Solicitud aprobada sin comentario adicional."
-        : "Solicitud rechazada sin motivo detallado."); 
+        : "Solicitud rechazada sin motivo detallado.");
 
     respond(
       {
@@ -92,8 +102,8 @@ function SolicitudDetailPage() {
         <CardHeader>
           <CardTitle>Detalle de solicitud</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col md:flex-row md:items-start gap-6">
-          {/* Info estudiante (pegada a la izquierda) */}
+        <CardContent className="flex flex-col md:flex-row md:items-start gap-12 md:gap-24">
+          {/* Info estudiante */}
           <div className="space-y-2">
             <h2 className="font-semibold text-lg">
               {student.name} {student.last_name}
@@ -113,37 +123,73 @@ function SolicitudDetailPage() {
             </p>
           </div>
 
-          {/* Foto nueva (más cerca y con título centrado) */}
-          <div className="flex flex-col items-center gap-2 md:ml-20">
-            <span className="text-lg font-medium text-center w-full">
-              Foto solicitada
-            </span>
-
-            {isPhotoLoading && (
-              <span className="text-xs text-muted-foreground">
-                Cargando foto...
+          {/* Columna de fotos */}
+          <div className="flex flex-col items-center gap-4 md:flex-row md:items-start md:justify-center">
+            {/* Foto actual */}
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-sm font-medium text-center w-full">
+                Foto actual en carnet
               </span>
-            )}
 
-            {isPhotoError && !isPhotoLoading && (
-              <span className="text-xs text-red-600">
-                No se pudo cargar la foto.
+              {isCurrentLoading && (
+                <span className="text-xs text-muted-foreground">
+                  Cargando foto actual...
+                </span>
+              )}
+
+              {isCurrentError && !isCurrentLoading && (
+                <span className="text-xs text-red-600">
+                  No se pudo cargar la foto actual.
+                </span>
+              )}
+
+              {!isCurrentLoading && !isCurrentError && currentPhotoUrl && (
+                <img
+                  src={currentPhotoUrl}
+                  alt="Foto actual del estudiante"
+                  className="w-32 h-32 md:w-36 md:h-36 rounded-lg object-cover border shadow-sm"
+                />
+              )}
+
+              {!isCurrentLoading && !isCurrentError && !currentPhotoUrl && (
+                <span className="text-xs text-muted-foreground">
+                  El estudiante no tiene foto registrada.
+                </span>
+              )}
+            </div>
+
+            {/* Foto solicitada */}
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-sm font-medium text-center w-full">
+                Foto solicitada
               </span>
-            )}
 
-            {!isPhotoLoading && !isPhotoError && photoUrl && (
-              <img
-                src={photoUrl}
-                alt="Nueva foto del estudiante"
-                className="w-40 h-40 rounded-lg object-cover border shadow-sm"
-              />
-            )}
+              {isNewLoading && (
+                <span className="text-xs text-muted-foreground">
+                  Cargando foto solicitada...
+                </span>
+              )}
 
-            {!isPhotoLoading && !isPhotoError && !photoUrl && (
-              <span className="text-xs text-muted-foreground">
-                No hay foto asociada
-              </span>
-            )}
+              {isNewError && !isNewLoading && (
+                <span className="text-xs text-red-600">
+                  No se pudo cargar la foto solicitada.
+                </span>
+              )}
+
+              {!isNewLoading && !isNewError && newPhotoUrl && (
+                <img
+                  src={newPhotoUrl}
+                  alt="Nueva foto del estudiante"
+                  className="w-32 h-32 md:w-36 md:h-36 rounded-lg object-cover border shadow-sm"
+                />
+              )}
+
+              {!isNewLoading && !isNewError && !newPhotoUrl && (
+                <span className="text-xs text-muted-foreground">
+                  No hay foto asociada a esta solicitud.
+                </span>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
